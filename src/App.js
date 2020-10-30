@@ -12,24 +12,28 @@ import {
 } from 'react-native';
 
 export default function App() {
-  const [repositories, setRepository] = useState([]);
+  const [repositories, setRepositories] = useState([]);
 
   useEffect(() => {
     api.get('repositories').then((response) => {
-      setRepository(response.data);
+      setRepositories(response.data);
     });
   }, []);
 
   async function handleLikeRepository(id) {
     const response = await api.post(`repositories/${id}/like`);
 
-    const repository = response.data;
+    const likedRepository = response.data;
 
-    const index = repositories.indexOf(repository.id);
+    const repositoriesUpdate = repositories.map((repository) => {
+      if (repository.id == id) {
+        return likedRepository;
+      } else {
+        return repository;
+      }
+    });
 
-    repositories.splice(index, 1);
-
-    setRepository([...repositories, repository]);
+    setRepositories(repositoriesUpdate);
   }
 
   return (
@@ -44,9 +48,9 @@ export default function App() {
               <Text style={styles.repository}>{repository.title}</Text>
 
               <View style={styles.techsContainer}>
-                {repository.map((repository) => (
-                  <Text key={repository.id} style={styles.tech}>
-                    {repository.techs}
+                {repository.techs.map((tech) => (
+                  <Text key={tech} style={styles.tech}>
+                    {tech}
                   </Text>
                 ))}
               </View>
@@ -56,7 +60,7 @@ export default function App() {
                   style={styles.likeText}
                   // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
                   testID={`repository-likes-${repository.id}`}>
-                  {repository.likes} Curtidas
+                  {repository.likes} curtidas
                 </Text>
               </View>
 
